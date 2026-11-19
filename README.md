@@ -75,34 +75,6 @@ pip install -r requirements.txt
 python app.py
 ```
 
-## 🎤 Voice-controlled presentation
-
-A keynote-style presentation of this project is built in: **double-click `present.bat`**
-(or open `http://localhost:8000/present` while PixelVault is running).
-
-- Click **Start with voice** and allow the microphone. Speak normally — when you say a slide's
-  keyword (e.g. "pixel", "encryption", "detect"), the next element animates in.
-- Voice commands work in **English, Hinglish and Hindi**:
-
-  | Want to… | Say (any of these) |
-  |---|---|
-  | Next slide | next slide · aage chalte hain · agli slide · aage chalo · move on · “next” then pause |
-  | Previous slide | go back · peeche chalo · pichli slide · wapas jao · “back” then pause |
-  | Next / previous point | next point · agla point · aur dikhao  /  pichla point · undo |
-  | Pause listening | ruko · pause · ek minute · stop listening · mic band karo |
-  | Resume | resume · chalo shuru karo · start listening · wapas suno |
-  | Jump to a slide | go to results · architecture pe chalo · ab testing dekhte hain · slide number 5 |
-  | Everything / replay | sab dikhao · show everything  /  slide dobara dikhao |
-
-  Single words like “next”, “back” or “ruko” only count at the **end** of what you say (when you pause),
-  so normal sentences such as “next level security” don't change the slide.
-- Press **P** for the presenter view: speaker notes, the keywords to say (in order), what the
-  microphone heard, a timer and controls. Put the main window on the projector (press **F** for fullscreen).
-- Press **H** to cycle captions: minimal → rehearsal (shows the next keyword) → hidden.
-- **Keyboard and clickers always work** as a backup: → / Space = next, ← = back, V = voice on/off.
-- Voice uses the browser's built-in speech recognition: it needs **Chrome or Edge and an internet
-  connection**. Without voice, the presentation works fully offline with keys or a clicker.
-
 ## ✅ Tests
 
 ```bash
@@ -113,7 +85,7 @@ password, tamper-proof flags, capacity limits, file hiding, JPG destruction, edi
 transparency, palette/grayscale images, self-destruct (read-once and attempt lock), X-ray,
 the detector, every API endpoint, filename sanitising and security headers.
 
-## 🎬 Demo script (for the presentation)
+## 🎬 Demo script
 
 1. **Hide**: click *Use a sample*, type a message, set a password, turn on *Self-destruct*, press **Hide secret**.
 2. Drag the **compare slider**: no visible difference. Show the stats (±1/255, PSNR > 50 dB).
@@ -148,7 +120,6 @@ Python 3 · Flask · Pillow · NumPy · cryptography (AES-GCM, PBKDF2) · HTML /
 PixelVault/
 ├── app.py               # Flask server + JSON API
 ├── static/index.html    # Glass UI: Hide · Extract · Detect · Learn
-├── static/present.html  # Voice-controlled keynote presentation (+ static/present/ images)
 ├── src/
 │   ├── stego.py         # LSB embedding, payload format, AES-GCM, errors
 │   ├── analysis.py      # Comparison stats, X-ray bit planes, RS steganalysis
@@ -156,7 +127,6 @@ PixelVault/
 │   └── sample.py        # Built-in sample photo
 ├── tests.py             # 34 automated tests
 ├── run.bat              # Windows one-click launcher
-├── present.bat          # Starts PixelVault and opens the voice presentation
 └── requirements.txt
 ```
 

@@ -132,7 +132,7 @@ def security_headers(resp):
         "default-src 'self'; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; "
         "script-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'none'")
     resp.headers["Cache-Control"] = "no-store"
-    resp.headers["Permissions-Policy"] = "microphone=(self)"
+    resp.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     return resp
 
 
@@ -142,16 +142,6 @@ def security_headers(resp):
 @app.route("/")
 def index():
     return send_from_directory(STATIC_DIR, "index.html")
-
-
-@app.route("/present")
-def present():
-    return send_from_directory(STATIC_DIR, "present.html")
-
-
-@app.route("/present/<path:name>")
-def present_asset(name):
-    return send_from_directory(os.path.join(STATIC_DIR, "present"), name)
 
 
 @app.route("/api/health")
