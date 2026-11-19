@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# PixelVault runtime data (self-destruct records)
+pixelvault_state.json
+pixelvault_state.json.tmp
+
+# College presentation decks (contain personal details)
+*.pptx
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

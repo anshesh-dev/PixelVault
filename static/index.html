@@ -1,0 +1,1237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PixelVault</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%235856D6'/%3E%3Crect x='8' y='14' width='16' height='11' rx='2.5' fill='none' stroke='white' stroke-width='2.2'/%3E%3Cpath d='M11 14v-3a5 5 0 0 1 10 0v3' fill='none' stroke='white' stroke-width='2.2'/%3E%3C/svg%3E">
+<style>
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI Variable Text","Segoe UI",Inter,system-ui,sans-serif;
+  --font-display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI Variable Display","Segoe UI",Inter,system-ui,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  --bg:#EEF0F7; --b1:#7AA2FF; --b2:#B697FF; --b3:#FF9FC9; --b4:#86E3D3; --blob-o:.55;
+  --glass:rgba(255,255,255,.58); --glass-2:rgba(255,255,255,.78); --glass-3:rgba(255,255,255,.42);
+  --edge:rgba(255,255,255,.75); --hair:rgba(20,20,40,.08); --hair-2:rgba(20,20,40,.14);
+  --text:#1D1D1F; --text-2:#3A3A3C; --muted:#5E5E63;
+  --accent:#5856D6; --accent-2:#4846C2; --accent-soft:rgba(88,86,214,.12); --link:#0066CC;
+  --ok:#1A8A43; --ok-soft:rgba(30,158,74,.13); --warn:#A55200; --warn-soft:rgba(255,149,0,.16);
+  --bad:#C7001A; --bad-soft:rgba(255,59,48,.12);
+  --shadow:0 1px 0 rgba(255,255,255,.6) inset,0 20px 50px rgba(40,40,90,.10),0 2px 6px rgba(40,40,90,.05);
+  --radius:26px;
+  color-scheme:light;
+}
+[data-theme="dark"]{
+  --bg:#0A0A12; --b1:#2D4BB8; --b2:#5B37B5; --b3:#9C2E6B; --b4:#1F7A6C; --blob-o:.45;
+  --glass:rgba(32,32,44,.55); --glass-2:rgba(44,44,58,.78); --glass-3:rgba(255,255,255,.06);
+  --edge:rgba(255,255,255,.12); --hair:rgba(255,255,255,.08); --hair-2:rgba(255,255,255,.16);
+  --text:#F5F5F7; --text-2:#D1D1D6; --muted:#A1A1A6;
+  --accent:#7D7AFF; --accent-2:#9896FF; --accent-soft:rgba(125,122,255,.18); --link:#5AB0FF;
+  --ok:#3DDC74; --ok-soft:rgba(48,209,88,.16); --warn:#FFB340; --warn-soft:rgba(255,159,10,.16);
+  --bad:#FF6961; --bad-soft:rgba(255,69,58,.16);
+  --shadow:0 1px 0 rgba(255,255,255,.06) inset,0 24px 60px rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;transition:background .4s}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--link)}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:2px;border-radius:10px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+
+/* ------------ background ------------ */
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.blob{position:absolute;width:52vmax;height:52vmax;border-radius:50%;filter:blur(90px);opacity:var(--blob-o);transition:background .6s}
+.blob.a{background:var(--b1);top:-18vmax;left:-12vmax}
+.blob.b{background:var(--b2);top:-10vmax;right:-16vmax}
+.blob.c{background:var(--b3);bottom:-22vmax;left:20vmax}
+.blob.d{background:var(--b4);bottom:-16vmax;right:-14vmax;width:40vmax;height:40vmax}
+@media (prefers-reduced-motion:no-preference){
+  .blob.a{animation:drift 26s ease-in-out infinite alternate}
+  .blob.b{animation:drift 32s ease-in-out infinite alternate-reverse}
+  .blob.c{animation:drift 38s ease-in-out infinite alternate}
+}
+@keyframes drift{to{transform:translate(6vmax,4vmax) scale(1.08)}}
+
+/* ------------ glass ------------ */
+.glass{background:var(--glass);-webkit-backdrop-filter:blur(30px) saturate(175%);backdrop-filter:blur(30px) saturate(175%);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:var(--radius)}
+
+/* ------------ nav ------------ */
+.navwrap{position:sticky;top:14px;z-index:30;display:flex;justify-content:center;padding:0 16px}
+nav.bar{display:flex;align-items:center;gap:14px;padding:8px 8px 8px 16px;border-radius:22px;width:min(980px,100%)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:650;font-size:17px;letter-spacing:-.3px;white-space:nowrap}
+.logo{width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center;box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 40%,transparent)}
+.tabs{position:relative;display:flex;gap:2px;padding:4px;border-radius:15px;background:var(--glass-3);margin:0 auto;border:1px solid var(--hair)}
+.tabs .pill{position:absolute;top:4px;bottom:4px;left:4px;border-radius:11px;background:var(--glass-2);box-shadow:0 2px 8px rgba(0,0,0,.12),0 0 0 .5px var(--hair);transition:transform .35s cubic-bezier(.3,1.3,.5,1),width .35s cubic-bezier(.3,1.3,.5,1)}
+.tabs button{position:relative;z-index:1;border:0;background:transparent;padding:8px 18px;min-height:36px;border-radius:11px;font-size:14px;font-weight:550;color:var(--muted);display:flex;align-items:center;gap:7px;transition:color .2s}
+.tabs button[aria-current="page"]{color:var(--text)}
+.iconbtn{width:40px;height:40px;border-radius:12px;border:0;background:var(--glass-3);display:grid;place-items:center;color:var(--text);border:1px solid var(--hair)}
+.iconbtn:hover{background:var(--glass-2)}
+
+/* ------------ layout ------------ */
+main{width:min(1080px,100%);margin:0 auto;padding:44px 20px 40px}
+.page{display:none;flex-direction:column;gap:22px}
+.page.on{display:flex;animation:rise .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(10px) scale(.995)}to{opacity:1;transform:none}}
+.hero{text-align:center;padding:8px 0 10px}
+.hero h1{margin:0;font-family:var(--font-display);font-size:clamp(34px,5vw,52px);line-height:1.05;letter-spacing:-1.4px;font-weight:700}
+.hero h1 .grad{color:var(--accent)}
+.hero p{margin:14px auto 0;max-width:620px;font-size:18px;color:var(--muted);line-height:1.5}
+.grid2{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:20px;align-items:start}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+.card{padding:24px}
+.card h2{margin:0;font-family:var(--font-display);font-size:20px;font-weight:650;letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
+.step{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center;flex:0 0 auto}
+.sub{color:var(--muted);font-size:14px;margin:6px 0 0}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.divider{height:1px;background:var(--hair);margin:4px 0}
+
+/* ------------ buttons ------------ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:14px;border:1px solid var(--hair);background:var(--glass-2);font-weight:600;font-size:15px;color:var(--text);transition:transform .12s,background .2s,box-shadow .2s;text-decoration:none;white-space:nowrap}
+.btn:hover{background:var(--glass-2);box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);border-color:transparent;color:#fff;box-shadow:0 8px 22px color-mix(in srgb,var(--accent) 35%,transparent)}
+.btn.primary:hover{background:var(--accent-2)}
+.btn.big{min-height:54px;font-size:17px;border-radius:16px;width:100%}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.ghost:hover{background:var(--glass-3);box-shadow:none}
+.btn.small{min-height:34px;padding:0 12px;font-size:13px;border-radius:10px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none;transform:none}
+.linkbtn{border:0;background:none;color:var(--link);font-weight:550;padding:4px;font-size:14px}
+.spin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.45);border-top-color:#fff;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ------------ segmented ------------ */
+.seg{display:inline-flex;padding:3px;border-radius:12px;background:var(--glass-3);border:1px solid var(--hair);gap:2px}
+.seg button{border:0;background:transparent;padding:6px 14px;min-height:32px;border-radius:9px;font-size:13px;font-weight:550;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--glass-2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+
+/* ------------ dropzone ------------ */
+.drop{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:240px;padding:24px;border-radius:20px;border:2px dashed var(--hair-2);background:var(--glass-3);text-align:center;cursor:pointer;transition:border-color .2s,background .2s,transform .2s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop.over{transform:scale(1.01)}
+.drop .ic{width:56px;height:56px;border-radius:16px;background:var(--glass-2);display:grid;place-items:center;color:var(--accent);box-shadow:0 4px 14px rgba(0,0,0,.06)}
+.drop b{font-size:16px}
+.drop span{font-size:13px;color:var(--muted)}
+.drop.has{padding:10px;min-height:0;border-style:solid;cursor:default}
+.drop.has:hover{background:var(--glass-3);border-color:var(--hair-2)}
+.drop.small{min-height:120px}
+.thumb{width:100%;max-height:300px;object-fit:contain;border-radius:14px;background:repeating-conic-gradient(var(--hair) 0 25%,transparent 0 50%) 0 0/18px 18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:600;background:var(--glass-2);border:1px solid var(--hair);color:var(--text-2)}
+.chip.ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.chip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.chip.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.chip.acc{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+
+/* ------------ inputs ------------ */
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.lbl{font-size:13px;font-weight:600;color:var(--text-2)}
+textarea,.input{width:100%;border:1px solid var(--hair-2);background:var(--glass-2);border-radius:14px;padding:12px 14px;font-size:15px;outline:none;transition:border-color .2s,box-shadow .2s}
+textarea{min-height:150px;resize:vertical;line-height:1.5}
+textarea:focus,.input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.pw{position:relative}
+.pw .input{padding-right:48px}
+.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:transparent;border-radius:10px;color:var(--muted);display:grid;place-items:center}
+.pw button:hover{background:var(--glass-3)}
+.meta{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted)}
+.strength{display:flex;gap:4px;margin-top:2px}
+.strength i{flex:1;height:4px;border-radius:2px;background:var(--hair-2);transition:background .3s}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+/* ------------ switch ------------ */
+.opt{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border-radius:14px;background:var(--glass-3);border:1px solid var(--hair)}
+.opt .t{display:flex;flex-direction:column;gap:2px}
+.opt .t b{font-size:14px;font-weight:600}
+.opt .t span{font-size:12px;color:var(--muted)}
+.opt.off{opacity:.5}
+.switch{position:relative;width:51px;height:31px;flex:0 0 auto}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;z-index:1}
+.switch .track{position:absolute;inset:0;border-radius:16px;background:var(--hair-2);transition:background .25s}
+.switch .knob{position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.18);transition:transform .25s cubic-bezier(.3,1.4,.5,1)}
+.switch input:checked~.track{background:#34C759}
+.switch input:checked~.knob{transform:translateX(20px)}
+.switch input:focus-visible~.track{outline:3px solid var(--accent-soft);outline-offset:2px}
+.switch input:disabled{cursor:not-allowed}
+.stepper{display:inline-flex;align-items:center;border-radius:10px;background:var(--glass-2);border:1px solid var(--hair)}
+.stepper button{width:32px;height:32px;border:0;background:transparent;font-size:18px;line-height:1;border-radius:9px}
+.stepper button:hover{background:var(--glass-3)}
+.stepper output{min-width:26px;text-align:center;font-weight:650}
+
+/* ------------ capacity meter ------------ */
+.meter{height:10px;border-radius:5px;background:var(--hair-2);overflow:hidden}
+.meter div{height:100%;width:0;border-radius:5px;background:var(--accent);transition:width .35s cubic-bezier(.2,.8,.2,1),background .3s}
+.reason{font-size:13px;color:var(--muted);text-align:center;min-height:18px}
+
+/* ------------ result ------------ */
+.result{scroll-margin-top:90px}
+.rhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.okbadge{width:48px;height:48px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;flex:0 0 auto}
+.okbadge.bad{background:var(--bad-soft);color:var(--bad)}
+.okbadge.warn{background:var(--warn-soft);color:var(--warn)}
+.okbadge.acc{background:var(--accent-soft);color:var(--accent)}
+.rhead h2{font-size:24px}
+.viewer{position:relative;border-radius:18px;overflow:hidden;background:#111;line-height:0;display:flex;justify-content:center;align-items:center}
+.viewer img{width:auto;max-width:100%;height:auto;max-height:62vh;display:block;user-select:none;-webkit-user-drag:none}
+.viewer.compare{width:fit-content;max-width:100%;margin:0 auto;background:transparent}
+.compare .before{position:absolute;inset:0;overflow:hidden;width:50%}
+.compare .before img{width:auto;height:100%;max-width:none}
+.compare input[type=range]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0;z-index:3}
+.compare .handle{position:absolute;top:0;bottom:0;left:50%;width:2px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.2);z-index:2;pointer-events:none}
+.compare .handle::after{content:"";position:absolute;top:50%;left:50%;width:40px;height:40px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.compare .handle svg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1}
+.tag{position:absolute;top:12px;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:600;line-height:1.2;color:#fff;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);z-index:2;pointer-events:none}
+.tag.l{left:12px}.tag.r{right:12px}
+.xray2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.xray2 .viewer{background:#000}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{padding:14px 16px;border-radius:16px;background:var(--glass-3);border:1px solid var(--hair)}
+.stat .k{font-size:12px;font-weight:600;color:var(--muted)}
+.stat .v{font-family:var(--font-display);font-size:24px;font-weight:700;letter-spacing:-.5px;margin-top:4px}
+.stat .h{font-size:12px;color:var(--muted);margin-top:2px}
+.note{display:flex;gap:12px;padding:14px 16px;border-radius:16px;background:var(--accent-soft);color:var(--text-2);font-size:14px;line-height:1.45}
+.note.warn{background:var(--warn-soft)}
+.note.bad{background:var(--bad-soft)}
+.note svg{flex:0 0 auto;margin-top:1px}
+.slider{display:flex;align-items:center;gap:12px}
+.slider input{flex:1;accent-color:var(--accent)}
+.bitlabel{font-size:13px;color:var(--muted);min-width:0}
+
+/* ------------ extract ------------ */
+.secret{position:relative;padding:20px 22px;border-radius:18px;background:var(--glass-2);border:1px solid var(--hair);font-size:18px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;min-height:64px;max-height:420px;overflow:auto}
+.caret::after{content:"";display:inline-block;width:2px;height:1.1em;background:var(--accent);margin-left:2px;vertical-align:-3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.filecard{display:flex;align-items:center;gap:16px;padding:18px;border-radius:18px;background:var(--glass-2);border:1px solid var(--hair);flex-wrap:wrap}
+.fileic{width:56px;height:64px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:.5px}
+.dots{display:flex;gap:6px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--hair-2)}
+.dots i.used{background:var(--bad)}
+
+/* ------------ detect ------------ */
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.dgrid{grid-template-columns:1fr}}
+.verdict{padding:18px;border-radius:18px;background:var(--glass-3);border:1px solid var(--hair);display:flex;flex-direction:column;gap:10px}
+.verdict .top{display:flex;align-items:center;gap:12px}
+.verdict .top b{font-size:17px}
+.verdict .top small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.gauge{position:relative;height:12px;border-radius:6px;background:linear-gradient(90deg,var(--ok-soft) 0 20%,var(--warn-soft) 20% 30%,var(--bad-soft) 30% 100%);border:1px solid var(--hair)}
+.gauge .mk{position:absolute;top:-5px;width:4px;height:20px;border-radius:2px;background:var(--text);transform:translateX(-2px);transition:left .6s cubic-bezier(.2,.8,.2,1)}
+.gauge .mk.actual{background:var(--accent)}
+.gscale{position:relative;height:16px;font-size:11px;color:var(--muted)}
+.gscale span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.gscale span:first-child{transform:none}
+.gscale span:last-child{transform:translateX(-100%)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:600}
+
+/* ------------ learn ------------ */
+.anim{display:flex;flex-direction:column;gap:20px}
+.caption{text-align:center;min-height:56px}
+.caption b{display:block;font-family:var(--font-display);font-size:22px;letter-spacing:-.4px}
+.caption span{color:var(--muted);font-size:15px}
+.stage{display:flex;flex-direction:column;align-items:center;gap:22px}
+.letter{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center}
+.lettertile{width:84px;height:84px;border-radius:22px;background:var(--accent);color:#fff;display:grid;place-items:center;font-family:var(--font-display);font-size:44px;font-weight:700;box-shadow:0 10px 24px color-mix(in srgb,var(--accent) 35%,transparent)}
+.arrow{color:var(--muted);font-size:22px}
+.code{font-family:var(--font-display);font-size:30px;font-weight:700}
+.bits{display:flex;gap:6px}
+.bit{width:34px;height:44px;border-radius:10px;display:grid;place-items:center;font-family:var(--mono);font-size:20px;font-weight:700;background:var(--glass-2);border:1px solid var(--hair);transition:all .3s}
+.bit.cur{background:var(--accent);color:#fff;transform:translateY(-6px);box-shadow:0 8px 18px color-mix(in srgb,var(--accent) 40%,transparent)}
+.bit.done{opacity:.35}
+.pixels{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.px{padding:12px;border-radius:18px;background:var(--glass-2);border:1px solid var(--hair);display:flex;flex-direction:column;gap:8px;min-width:170px}
+.px .sw{height:44px;border-radius:12px;display:flex;overflow:hidden;border:1px solid var(--hair)}
+.px .sw div{flex:1}
+.ch{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;padding:4px 8px;border-radius:8px;transition:background .3s}
+.ch .n{font-weight:700;width:28px}
+.ch code{font-family:var(--mono);font-size:13px;letter-spacing:.5px}
+.ch code em{font-style:normal;padding:0 2px;border-radius:3px;background:var(--accent-soft);color:var(--accent);font-weight:800}
+.ch.hit{background:var(--accent-soft)}
+.ch.idle{opacity:.4}
+.ch .d{font-weight:700;min-width:36px;text-align:right}
+.ch .d.chg{color:var(--accent)}
+.controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;align-items:center}
+.progress{display:flex;gap:6px;justify-content:center}
+.progress i{width:8px;height:8px;border-radius:4px;background:var(--hair-2);transition:all .3s}
+.progress i.on{width:22px;background:var(--accent)}
+.explain{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.explain .card h3{margin:12px 0 6px;font-size:17px;font-family:var(--font-display);letter-spacing:-.2px}
+.explain .card p{margin:0;color:var(--text-2);font-size:14px;line-height:1.55}
+.explain .ic{width:44px;height:44px;border-radius:13px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+
+/* ------------ toast ------------ */
+.toasts{position:fixed;top:84px;left:50%;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;gap:8px;width:min(420px,calc(100% - 32px));pointer-events:none}
+.toast{display:flex;gap:12px;align-items:center;padding:12px 16px;border-radius:18px;pointer-events:auto;animation:drop .4s cubic-bezier(.3,1.3,.5,1)}
+.toast b{display:block;font-size:14px}
+.toast span{font-size:13px;color:var(--muted)}
+.toast .ti{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto}
+@keyframes drop{from{opacity:0;transform:translateY(-14px) scale(.96)}to{opacity:1;transform:none}}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:10px 20px 40px;display:flex;flex-direction:column;gap:8px;align-items:center}
+
+@media (max-width:720px){
+  nav.bar{flex-wrap:wrap;justify-content:space-between;padding:8px}
+  .tabs{order:3;width:100%;justify-content:space-between}
+  .tabs button{padding:8px 10px;flex:1;justify-content:center}
+  .tabs button .lbl-ic{display:none}
+  main{padding-top:28px}
+  .card{padding:18px}
+  .xray2{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div><div class="blob d"></div></div>
+
+<div class="navwrap">
+  <nav class="bar glass" aria-label="Main">
+    <div class="brand"><div class="logo" data-icon="lock" data-color="#fff"></div>PixelVault</div>
+    <div class="tabs" id="tabs">
+      <span class="pill" aria-hidden="true"></span>
+      <button type="button" data-tab="hide"><span class="lbl-ic" data-icon="eyeoff" data-size="16"></span>Hide</button>
+      <button type="button" data-tab="extract"><span class="lbl-ic" data-icon="unlock" data-size="16"></span>Extract</button>
+      <button type="button" data-tab="detect"><span class="lbl-ic" data-icon="scan" data-size="16"></span>Detect</button>
+      <button type="button" data-tab="learn"><span class="lbl-ic" data-icon="spark" data-size="16"></span>Learn</button>
+    </div>
+    <button type="button" class="iconbtn" id="themeBtn" aria-label="Switch light or dark mode"></button>
+  </nav>
+</div>
+
+<main>
+<!-- ================================================================ HIDE -->
+<section class="page" id="page-hide" aria-labelledby="h-hide">
+  <div class="hero">
+    <h1 id="h-hide">Hide a secret <span class="grad">in plain sight.</span></h1>
+    <p>Tuck a message or a whole file inside any photo. It looks exactly the same, and only someone with the password can read it.</p>
+  </div>
+
+  <div class="grid2">
+    <section class="glass card stack" aria-labelledby="h-photo">
+      <div>
+        <h2 id="h-photo"><span class="step">1</span>Choose a photo</h2>
+        <p class="sub">PNG, JPG, BMP or WebP. Bigger photos hold more.</p>
+      </div>
+      <div class="drop" id="hideDrop" tabindex="0" role="button" aria-label="Choose a photo. You can also drag and drop or paste.">
+        <div class="ic" data-icon="image" data-size="26"></div>
+        <b>Drop a photo here</b>
+        <span>or click to browse · you can also paste</span>
+      </div>
+      <input type="file" id="hideFile" accept="image/*" hidden>
+      <div class="row" style="justify-content:center">
+        <button type="button" class="linkbtn" id="useSample">No photo handy? Use a sample</button>
+      </div>
+      <div id="hideWarn"></div>
+    </section>
+
+    <section class="glass card stack" aria-labelledby="h-what">
+      <div class="row" style="justify-content:space-between">
+        <h2 id="h-what"><span class="step">2</span>What to hide</h2>
+        <div class="seg" role="group" aria-label="Type of secret" id="modeSeg">
+          <button type="button" data-mode="text" aria-pressed="true">Message</button>
+          <button type="button" data-mode="file" aria-pressed="false">File</button>
+        </div>
+      </div>
+
+      <div class="field" id="textBox">
+        <label for="msg" class="sr">Secret message</label>
+        <textarea id="msg" placeholder="Type your secret message…" maxlength="2000000"></textarea>
+        <div class="meta"><span id="msgCount">0 characters</span><span>Hindi, Hinglish and emoji all work</span></div>
+      </div>
+      <div id="fileBox" hidden>
+        <div class="drop small" id="secretDrop" tabindex="0" role="button" aria-label="Choose a file to hide">
+          <div class="ic" data-icon="file" data-size="24"></div>
+          <b>Drop any file</b>
+          <span>PDF, image, document, zip…</span>
+        </div>
+        <input type="file" id="secretFile" hidden>
+      </div>
+
+      <div class="divider"></div>
+      <h2><span class="step">3</span>Lock it <span style="font-size:14px;color:var(--muted);font-weight:500">(recommended)</span></h2>
+      <div class="field">
+        <label for="hidePw">Password</label>
+        <div class="pw">
+          <input class="input" id="hidePw" type="password" autocomplete="new-password" placeholder="Leave empty for no password">
+          <button type="button" data-action="toggle-pw" data-target="hidePw" aria-label="Show password"></button>
+        </div>
+        <div class="strength" id="strength" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="meta"><span id="strengthLbl">Encrypted with AES-256 when you set a password</span></div>
+      </div>
+      <div class="opt off" id="optOnce">
+        <div class="t"><b>Self-destruct after reading</b><span>The secret opens only once</span></div>
+        <label class="switch"><input type="checkbox" id="readOnce" disabled aria-label="Self-destruct after reading"><span class="track"></span><span class="knob"></span></label>
+      </div>
+      <div class="opt off" id="optLock">
+        <div class="t"><b>Lock after wrong passwords</b><span>Destroy it after <span id="attemptsTxt">3</span> wrong tries</span></div>
+        <div class="row" style="gap:12px">
+          <div class="stepper" aria-label="Number of wrong tries allowed">
+            <button type="button" data-action="attempts" data-d="-1" aria-label="Fewer tries">−</button>
+            <output id="attempts" class="num">3</output>
+            <button type="button" data-action="attempts" data-d="1" aria-label="More tries">+</button>
+          </div>
+          <label class="switch"><input type="checkbox" id="lockOn" disabled aria-label="Lock after wrong passwords"><span class="track"></span><span class="knob"></span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="meta" style="font-size:13px"><span class="lbl">Space used</span><span id="capTxt" class="num">Choose a photo first</span></div>
+        <div class="meter" role="progressbar" aria-label="Space used in the photo" aria-valuemin="0" aria-valuemax="100" id="capBar"><div></div></div>
+      </div>
+      <button type="button" class="btn primary big" id="hideBtn" disabled><span data-icon="lock" data-size="18"></span>Hide secret</button>
+      <div class="reason" id="hideReason">Choose a photo and write a message</div>
+    </section>
+  </div>
+
+  <section class="glass card stack result" id="hideResult" hidden aria-live="polite"></section>
+</section>
+
+<!-- ================================================================ EXTRACT -->
+<section class="page" id="page-extract" aria-labelledby="h-ex">
+  <div class="hero">
+    <h1 id="h-ex">Reveal <span class="grad">what's hidden.</span></h1>
+    <p>Open a PixelVault photo to read the secret inside. If it's locked, you'll need the password.</p>
+  </div>
+  <div class="grid2">
+    <section class="glass card stack" aria-labelledby="h-exphoto">
+      <h2 id="h-exphoto"><span class="step">1</span>Open the photo</h2>
+      <div class="drop" id="extractDrop" tabindex="0" role="button" aria-label="Choose the photo with the secret">
+        <div class="ic" data-icon="image" data-size="26"></div>
+        <b>Drop the PixelVault photo</b>
+        <span>Use the original PNG, not a screenshot or WhatsApp copy</span>
+      </div>
+      <input type="file" id="extractFile" accept="image/*" hidden>
+    </section>
+    <section class="glass card stack" aria-labelledby="h-expw">
+      <h2 id="h-expw"><span class="step">2</span>Unlock</h2>
+      <div class="field" id="exPwField">
+        <label for="exPw">Password</label>
+        <div class="pw">
+          <input class="input" id="exPw" type="password" autocomplete="off" placeholder="Only if the secret is locked">
+          <button type="button" data-action="toggle-pw" data-target="exPw" aria-label="Show password"></button>
+        </div>
+      </div>
+      <div id="exHint"></div>
+      <button type="button" class="btn primary big" id="extractBtn" disabled><span data-icon="unlock" data-size="18"></span>Reveal secret</button>
+      <div class="reason" id="exReason">Open a photo first</div>
+    </section>
+  </div>
+  <section class="glass card stack result" id="exResult" hidden aria-live="polite"></section>
+</section>
+
+<!-- ================================================================ DETECT -->
+<section class="page" id="page-detect" aria-labelledby="h-det">
+  <div class="hero">
+    <h1 id="h-det">Is something <span class="grad">hiding here?</span></h1>
+    <p>Scan any photo for hidden data. A signature check finds PixelVault secrets, and RS analysis, a forensic test, estimates hidden data from any LSB tool.</p>
+  </div>
+  <section class="glass card stack">
+    <div class="drop" id="detectDrop" tabindex="0" role="button" aria-label="Choose a photo to scan">
+      <div class="ic" data-icon="scan" data-size="26"></div>
+      <b>Drop a photo to scan</b>
+      <span>Nothing is revealed and no password is needed</span>
+    </div>
+    <input type="file" id="detectFile" accept="image/*" hidden>
+  </section>
+  <div id="detResult" class="stack" hidden aria-live="polite"></div>
+</section>
+
+<!-- ================================================================ LEARN -->
+<section class="page" id="page-learn" aria-labelledby="h-learn">
+  <div class="hero">
+    <h1 id="h-learn">How it <span class="grad">actually works.</span></h1>
+    <p>Watch one letter disappear into three pixels, bit by bit.</p>
+  </div>
+  <section class="glass card anim" aria-labelledby="h-anim">
+    <h2 id="h-anim" class="sr">Animation: hiding one letter</h2>
+    <div class="row" style="justify-content:center">
+      <label for="animChar" class="lbl">Try a letter</label>
+      <input class="input" id="animChar" maxlength="1" value="H" style="width:64px;text-align:center;font-size:20px;font-weight:700;padding:8px">
+    </div>
+    <div class="caption" aria-live="polite"><b id="capTitle"></b><span id="capText"></span></div>
+    <div class="stage" id="stage"></div>
+    <div class="progress" id="progress"></div>
+    <div class="controls">
+      <button type="button" class="btn" data-action="anim-prev"><span data-icon="left" data-size="16"></span>Back</button>
+      <button type="button" class="btn primary" data-action="anim-next" id="animNext">Next<span data-icon="right" data-size="16"></span></button>
+      <button type="button" class="btn ghost" data-action="anim-reset">Start over</button>
+    </div>
+  </section>
+  <div class="explain">
+    <div class="glass card"><div class="ic" data-icon="grid" data-size="22"></div><h3>LSB steganography</h3><p>Each colour value is 8 bits. Changing only the last bit shifts the colour by 1 out of 256, a difference no eye can see. PixelVault writes your data into those last bits, three per pixel.</p></div>
+    <div class="glass card"><div class="ic" data-icon="lock" data-size="22"></div><h3>AES-256 encryption</h3><p>With a password, the secret is encrypted with AES-256-GCM before hiding. The key comes from your password via PBKDF2 (200,000 rounds). GCM also detects a wrong password or any tampering.</p></div>
+    <div class="glass card"><div class="ic" data-icon="flame" data-size="22"></div><h3>Self-destruct</h3><p>Each secret has a random ID. PixelVault records it once a read-once secret is opened, or after too many wrong passwords, and refuses to open it again. The settings are sealed inside the encryption, so they can't be edited.</p></div>
+    <div class="glass card"><div class="ic" data-icon="scan" data-size="22"></div><h3>RS steganalysis</h3><p>Hiding random bits upsets a natural balance between smooth and rough pixel groups. RS analysis (Fridrich, 2001) measures that imbalance to estimate how much of a photo carries hidden data, with no password needed.</p></div>
+    <div class="glass card"><div class="ic" data-icon="image" data-size="22"></div><h3>Why PNG, never JPG</h3><p>PNG is lossless, so every bit survives. JPG and chat apps re-compress photos and scramble the last bits, which erases the secret. Always send the PNG as a document or file.</p></div>
+    <div class="glass card"><div class="ic" data-icon="eye" data-size="22"></div><h3>Pixel X-ray</h3><p>Bit-plane slicing shows one bit of every colour as black or white. High bits show the picture; bit 0 looks like static. Where data is hidden, that static becomes perfectly uniform noise.</p></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <span><span data-icon="shield" data-size="14"></span> Runs entirely on this computer. Your photos never leave your device.</span>
+  <span><a href="/present" style="font-weight:600">Open voice presentation</a> · <button type="button" class="linkbtn" data-action="reset">Reset demo data</button></span>
+</footer>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+"use strict";
+// =====================================================================
+// Icons (inline SVG, stroke style)
+// =====================================================================
+const ICONS = {
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  unlock: '<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/>',
+  image: '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
+  file: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  eyeoff: '<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4"/><path d="M6.2 6.3C3.6 8 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 4.5-1.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
+  scan: '<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M4 12h16"/>',
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.7 1.8 1.8.7-1.8.7L19 22l-.7-1.8-1.8-.7 1.8-.7z"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  copy: '<rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/>',
+  download: '<path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>',
+  flame: '<path d="M12 22c4 0 7-3 7-7 0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-3 3-5 5-5 8 0 4 3 7 7 7z"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+  warn: '<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17.5h.01"/>',
+  left: '<path d="M15 6l-6 6 6 6"/>',
+  right: '<path d="M9 6l6 6-6 6"/>',
+  shield: '<path d="M12 3l8 3v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  grid: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+  arrows: '<path d="M9 6l-6 6 6 6M15 6l6 6-6 6"/>',
+  trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+};
+function icon(name, size = 20, color = "currentColor", width = 2) {
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="' + width +
+    '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || "") + "</svg>";
+}
+function paintIcons(root = document) {
+  root.querySelectorAll("[data-icon]").forEach((el) => {
+    el.innerHTML = icon(el.dataset.icon, Number(el.dataset.size || 20), el.dataset.color || "currentColor");
+  });
+}
+
+// =====================================================================
+// Helpers
+// =====================================================================
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const enc = new TextEncoder();
+function human(n) {
+  if (n == null) return "—";
+  if (n < 1024) return n.toLocaleString() + " bytes";
+  const u = ["KB", "MB", "GB"]; let i = -1;
+  do { n /= 1024; i++; } while (n >= 1024 && i < u.length - 1);
+  return n.toFixed(n < 10 ? 2 : 1) + " " + u[i];
+}
+async function api(url, body) {
+  const res = await fetch(url, body ? { method: "POST", body } : undefined);
+  let data = {};
+  try { data = await res.json(); } catch (e) { data = { ok: false, code: "server_error", message: "Unexpected response from the server." }; }
+  if (!res.ok || data.ok === false) { const err = new Error(data.message || "Request failed"); err.data = data; throw err; }
+  return data;
+}
+function toast(title, text, kind = "ok") {
+  const el = document.createElement("div");
+  el.className = "toast glass";
+  const col = { ok: "var(--ok)", bad: "var(--bad)", warn: "var(--warn)", info: "var(--accent)" }[kind];
+  const ic = { ok: "check", bad: "x", warn: "warn", info: "info" }[kind];
+  el.innerHTML = '<span class="ti" style="background:color-mix(in srgb,' + col + ' 16%,transparent);color:' + col + '">' + icon(ic, 16) + "</span>" +
+    "<div><b>" + esc(title) + "</b>" + (text ? "<span>" + esc(text) + "</span>" : "") + "</div>";
+  $("#toasts").prepend(el);
+  setTimeout(() => { el.style.transition = "opacity .3s, transform .3s"; el.style.opacity = "0"; el.style.transform = "translateY(-8px)"; }, 3800);
+  setTimeout(() => el.remove(), 4200);
+}
+function setBusy(btn, busy, label) {
+  if (busy) { btn.dataset.html = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>' + esc(label); }
+  else if (btn.dataset.html) { btn.innerHTML = btn.dataset.html; delete btn.dataset.html; }
+}
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// =====================================================================
+// Theme
+// =====================================================================
+function storeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function storeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  $("#themeBtn").innerHTML = icon(t === "dark" ? "sun" : "moon", 19);
+  $("#themeBtn").setAttribute("aria-label", t === "dark" ? "Switch to light mode" : "Switch to dark mode");
+}
+applyTheme(storeGet("pv-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+$("#themeBtn").addEventListener("click", () => {
+  const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  applyTheme(t); storeSet("pv-theme", t);
+});
+
+// =====================================================================
+// Tabs with sliding pill
+// =====================================================================
+const TABS = ["hide", "extract", "detect", "learn"];
+let tab = "hide";
+function movePill() {
+  const btn = $('#tabs [data-tab="' + tab + '"]');
+  const pill = $("#tabs .pill");
+  if (!btn) return;
+  pill.style.width = btn.offsetWidth + "px";
+  pill.style.transform = "translateX(" + (btn.offsetLeft - 4) + "px)";
+}
+function go(t, opts = {}) {
+  if (!TABS.includes(t)) t = "hide";
+  tab = t;
+  document.querySelectorAll(".page").forEach((p) => p.classList.toggle("on", p.id === "page-" + t));
+  document.querySelectorAll("#tabs [data-tab]").forEach((b) => {
+    if (b.dataset.tab === t) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+  movePill();
+  if (location.hash.slice(1) !== t) history.replaceState(null, "", "#" + t);
+  if (!opts.keepScroll) window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+  if (t === "learn") renderAnim();
+}
+$("#tabs").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) go(b.dataset.tab); });
+window.addEventListener("resize", movePill);
+window.addEventListener("hashchange", () => go(location.hash.slice(1)));
+
+// =====================================================================
+// Drop zones
+// =====================================================================
+const DROPS = {};
+function dropzone(id, inputId, onFile, opts = {}) {
+  const el = $("#" + id), input = $("#" + inputId);
+  DROPS[id] = { el, onFile };
+  const pick = () => { if (!el.classList.contains("has") || opts.reclick) input.click(); };
+  el.addEventListener("click", (e) => { if (!e.target.closest("button")) pick(); });
+  el.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && e.target === el) { e.preventDefault(); input.click(); } });
+  input.addEventListener("change", () => { if (input.files[0]) onFile(input.files[0]); input.value = ""; });
+  ["dragenter", "dragover"].forEach((ev) => el.addEventListener(ev, (e) => { e.preventDefault(); el.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((ev) => el.addEventListener(ev, (e) => { e.preventDefault(); el.classList.remove("over"); }));
+  el.addEventListener("drop", (e) => { const f = e.dataTransfer.files[0]; if (f) onFile(f); });
+  return { el, input };
+}
+// Don't let a file dropped outside a zone open in the browser
+window.addEventListener("dragover", (e) => e.preventDefault());
+window.addEventListener("drop", (e) => e.preventDefault());
+// Paste an image into the current page
+window.addEventListener("paste", (e) => {
+  if (e.target.matches("textarea, input")) return;
+  const item = [...(e.clipboardData?.items || [])].find((i) => i.type.startsWith("image/"));
+  if (!item) return;
+  const f = item.getAsFile();
+  const file = new File([f], "pasted-image.png", { type: f.type });
+  if (tab === "hide") setHideImage(file);
+  else if (tab === "extract") setExtractImage(file);
+  else if (tab === "detect") runDetect(file);
+});
+function isImage(f) { return f && (f.type.startsWith("image/") || /\.(png|jpe?g|bmp|webp|gif|tiff?)$/i.test(f.name)); }
+function photoView(file, info, clearAction) {
+  const url = URL.createObjectURL(file);
+  return '<img class="thumb" src="' + url + '" alt="Chosen photo preview">' +
+    '<div class="chips">' + info + "</div>" +
+    '<div class="row" style="justify-content:center"><button type="button" class="btn small" data-action="' + clearAction + '-change">Change photo</button>' +
+    '<button type="button" class="btn small ghost" data-action="' + clearAction + '-clear">' + icon("trash", 15) + "Remove</button></div>";
+}
+function resetDrop(id, title, subtitle, ic = "image") {
+  const el = $("#" + id);
+  el.classList.remove("has");
+  el.innerHTML = '<div class="ic">' + icon(ic, 26) + "</div><b>" + esc(title) + "</b><span>" + esc(subtitle) + "</span>";
+}
+
+// =====================================================================
+// HIDE
+// =====================================================================
+const H = { image: null, info: null, mode: "text", file: null, attempts: 3, busy: false };
+dropzone("hideDrop", "hideFile", (f) => setHideImage(f));
+dropzone("secretDrop", "secretFile", (f) => setSecretFile(f), { reclick: true });
+
+async function setHideImage(file) {
+  if (!isImage(file)) return toast("That's not an image", "Choose a PNG, JPG, BMP or WebP photo.", "bad");
+  H.image = file; H.info = null;
+  const el = $("#hideDrop");
+  el.classList.add("has");
+  el.innerHTML = photoView(file, '<span class="chip">Reading photo…</span>', "hide");
+  updateHide();
+  const fd = new FormData(); fd.append("image", file);
+  try {
+    const info = await api("/api/inspect", fd);
+    if (H.image !== file) return;
+    H.info = info;
+    el.querySelector(".chips").innerHTML =
+      '<span class="chip num">' + info.width.toLocaleString() + " × " + info.height.toLocaleString() + "</span>" +
+      '<span class="chip">' + esc(info.format) + "</span>" +
+      '<span class="chip acc num">Holds ' + esc(info.capacity_human) + "</span>";
+    $("#hideWarn").innerHTML = info.warnings.map((w) => '<div class="note warn">' + icon("info", 18) + "<span>" + esc(w) + "</span></div>").join("");
+  } catch (err) {
+    clearHideImage();
+    toast("Can't use this photo", err.message, "bad");
+  }
+  updateHide();
+}
+function clearHideImage() {
+  H.image = null; H.info = null;
+  resetDrop("hideDrop", "Drop a photo here", "or click to browse · you can also paste");
+  $("#hideWarn").innerHTML = "";
+  updateHide();
+}
+function setSecretFile(f) {
+  if (f.size === 0) return toast("That file is empty", "", "bad");
+  H.file = f;
+  const el = $("#secretDrop");
+  el.classList.add("has");
+  const ext = (f.name.split(".").pop() || "file").slice(0, 4).toUpperCase();
+  el.innerHTML = '<div class="filecard" style="width:100%;background:transparent;border:0;padding:6px"><div class="fileic">' + esc(ext) + "</div>" +
+    '<div style="flex:1;min-width:0;text-align:left"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(f.name) +
+    '</b><span class="num">' + human(f.size) + '</span></div><button type="button" class="btn small ghost" data-action="secret-clear">' + icon("trash", 15) + "Remove</button></div>";
+  updateHide();
+}
+function clearSecretFile() {
+  H.file = null;
+  resetDrop("secretDrop", "Drop any file", "PDF, image, document, zip…", "file");
+  updateHide();
+}
+async function useSample() {
+  const btn = $("#useSample");
+  btn.disabled = true;
+  try {
+    const res = await fetch("/api/sample.png");
+    const blob = await res.blob();
+    await setHideImage(new File([blob], "pixelvault-sample.png", { type: "image/png" }));
+  } catch (e) { toast("Couldn't load the sample", "Is PixelVault still running?", "bad"); }
+  btn.disabled = false;
+}
+
+function secretBytes() {
+  if (H.mode === "text") return enc.encode($("#msg").value).length;
+  return H.file ? H.file.size + enc.encode(H.file.name).length : 0;
+}
+function updateHide() {
+  const pw = $("#hidePw").value;
+  // password strength
+  const score = pwScore(pw);
+  const colors = ["var(--bad)", "var(--warn)", "#C9A400", "var(--ok)"];
+  document.querySelectorAll("#strength i").forEach((b, i) => (b.style.background = pw && i < score ? colors[Math.max(0, score - 1)] : ""));
+  $("#strengthLbl").textContent = !pw ? "Encrypted with AES-256 when you set a password"
+    : ["Too weak, add more characters", "Weak", "Okay", "Strong", "Excellent"][score] + " · encrypted with AES-256";
+  // self-destruct needs a password
+  const hasPw = pw.length > 0;
+  ["readOnce", "lockOn"].forEach((id) => { const c = $("#" + id); c.disabled = !hasPw; if (!hasPw) c.checked = false; });
+  $("#optOnce").classList.toggle("off", !hasPw);
+  $("#optLock").classList.toggle("off", !hasPw);
+  $("#attemptsTxt").textContent = H.attempts;
+  $("#attempts").textContent = H.attempts;
+
+  // counter
+  const txt = $("#msg").value;
+  $("#msgCount").textContent = [...txt].length.toLocaleString() + " characters · " + human(enc.encode(txt).length);
+
+  // capacity
+  const need = secretBytes() ? secretBytes() + 3 + (hasPw ? 44 : 0) : 0;
+  const cap = H.info ? H.info.capacity : 0;
+  const pct = cap ? Math.min(100, (need / cap) * 100) : 0;
+  const bar = $("#capBar div");
+  bar.style.width = (need && cap ? Math.max(1.5, pct) : 0) + "%";
+  bar.style.background = pct > 100 || need > cap ? "var(--bad)" : pct > 80 ? "var(--warn)" : "var(--accent)";
+  $("#capBar").setAttribute("aria-valuenow", Math.round(pct));
+  $("#capTxt").textContent = !H.info ? "Choose a photo first" : human(need) + " of " + human(cap) + (need ? " · " + (pct < 0.1 ? "<0.1" : pct.toFixed(pct < 10 ? 1 : 0)) + "%" : "");
+
+  // button state + reason
+  let reason = "";
+  const textBig = H.mode === "text" && need > cap && txt.length > 2000;
+  if (!H.image) reason = H.mode === "text" && !txt ? "Choose a photo and write a message" : "Choose a photo";
+  else if (!H.info) reason = "Reading the photo…";
+  else if (H.mode === "text" && !txt.trim()) reason = "Write a message to hide";
+  else if (H.mode === "file" && !H.file) reason = "Choose a file to hide";
+  else if (need > cap && !textBig) reason = "Too big for this photo. Use a bigger photo or a smaller secret.";
+  else if (textBig) reason = "Long text gets compressed, so it may still fit. Try it.";
+  $("#hideBtn").disabled = H.busy || !!reason && !textBig;
+  $("#hideReason").textContent = reason || (hasPw ? "Ready. Your secret will be encrypted." : "Ready. Tip: add a password so only you can read it.");
+}
+function pwScore(p) {
+  if (!p) return 0;
+  let s = 0;
+  if (p.length >= 8) s++;
+  if (p.length >= 12) s++;
+  if (/[a-z]/.test(p) && /[A-Z]/.test(p)) s++;
+  if (/\d/.test(p) && /[^A-Za-z0-9]/.test(p)) s++;
+  if (p.length < 6) s = Math.min(s, 0);
+  return Math.max(p.length >= 4 ? 1 : 0, Math.min(4, s));
+}
+
+async function doHide() {
+  if (H.busy) return;
+  const fd = new FormData();
+  fd.append("image", H.image);
+  fd.append("mode", H.mode);
+  if (H.mode === "text") fd.append("text", $("#msg").value); else fd.append("secret_file", H.file);
+  const pw = $("#hidePw").value;
+  if (pw) fd.append("password", pw);
+  if ($("#readOnce").checked) fd.append("read_once", "1");
+  if ($("#lockOn").checked) fd.append("max_attempts", String(H.attempts));
+  H.busy = true;
+  setBusy($("#hideBtn"), true, "Hiding…");
+  try {
+    const r = await api("/api/hide", fd);
+    renderHideResult(r);
+    toast("Secret hidden", "Download the PNG and share it as a file.");
+  } catch (err) {
+    toast("Couldn't hide the secret", err.message, "bad");
+  } finally {
+    H.busy = false;
+    setBusy($("#hideBtn"), false);
+    updateHide();
+  }
+}
+
+let R = null;   // last hide result
+function renderHideResult(r) {
+  R = { ...r, view: "compare", bit: 0 };
+  const s = r.stats;
+  const prot = r.encrypted
+    ? { v: "AES-256", h: r.read_once ? "Self-destructs after reading" : r.max_attempts ? "Locks after " + r.max_attempts + " wrong tries" : "Password protected" }
+    : { v: "None", h: "Anyone with PixelVault can read it" };
+  const el = $("#hideResult");
+  el.hidden = false;
+  el.innerHTML =
+    '<div class="rhead"><div class="okbadge">' + icon("check", 26, "currentColor", 2.6) + "</div>" +
+      '<div style="flex:1;min-width:240px"><h2>Your secret is hidden</h2><p class="sub">It looks identical: ' +
+      s.changed_percent.toLocaleString(undefined, { maximumFractionDigits: 2 }) + "% of pixels changed, each by at most " + s.max_change + " shade out of 255.</p></div>" +
+      '<a class="btn primary" href="/api/result/' + esc(r.token) + '/download" download="' + esc(r.filename) + '">' + icon("download", 18) + "Download PNG</a></div>" +
+    '<div class="row" style="justify-content:space-between">' +
+      '<div class="seg" role="group" aria-label="Viewer" id="viewSeg">' +
+        '<button type="button" data-view="compare" aria-pressed="true">Compare</button>' +
+        '<button type="button" data-view="diff" aria-pressed="false">Changed pixels</button>' +
+        '<button type="button" data-view="xray" aria-pressed="false">Pixel X-ray</button></div>' +
+      '<span class="sub" id="viewHint" style="margin:0"></span></div>' +
+    '<div id="viewer"></div>' +
+    '<div class="stats">' +
+      stat("Pixels changed", s.changed_pixels.toLocaleString(), s.changed_percent.toLocaleString(undefined, { maximumFractionDigits: 3 }) + "% of the photo") +
+      stat("Max colour change", "±" + s.max_change + "/255", "Invisible to the eye") +
+      stat("Image quality (PSNR)", s.psnr == null ? "∞" : s.psnr.toFixed(1) + " dB", "Above 40 dB looks identical") +
+      stat(r.kind === "file" ? "File size" : "Message size", human(r.secret_bytes), r.compressed ? "Compressed before hiding" : "Stored as is") +
+      stat("Space used", (r.used_percent < 0.01 ? "<0.01" : r.used_percent.toFixed(r.used_percent < 10 ? 2 : 1)) + "%", "of " + human(r.capacity)) +
+      stat("Protection", prot.v, prot.h) +
+    "</div>" +
+    '<div class="note">' + icon("info", 18) + "<span><b>Share it as a file.</b> WhatsApp, Instagram and screenshots re-compress photos and erase the secret. Send the PNG as a document, by email, or on a pen drive.</span></div>" +
+    '<div class="row"><button type="button" class="btn" data-action="send-extract">' + icon("unlock", 17) + "Test it in Extract</button>" +
+    '<button type="button" class="btn" data-action="send-detect">' + icon("scan", 17) + "Scan it with Detect</button>" +
+    '<button type="button" class="btn ghost" data-action="hide-new">Hide another</button></div>';
+  renderViewer();
+  setTimeout(() => el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" }), 60);
+}
+function stat(k, v, h) { return '<div class="stat"><div class="k">' + esc(k) + '</div><div class="v num">' + esc(v) + '</div><div class="h">' + esc(h) + "</div></div>"; }
+
+const BIT_TEXT = ["Bit 0, the least significant: where secrets hide", "Bit 1: still mostly noise", "Bit 2: shapes start to appear", "Bit 3", "Bit 4", "Bit 5", "Bit 6", "Bit 7, the most significant: the picture's outline"];
+function renderViewer() {
+  if (!R) return;
+  const base = "/api/result/" + encodeURIComponent(R.token);
+  document.querySelectorAll("#viewSeg button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.view === R.view));
+  const v = $("#viewer");
+  if (R.view === "compare") {
+    $("#viewHint").textContent = "Drag the handle. Can you spot a difference?";
+    v.innerHTML = '<div class="viewer compare" id="cmp"><img src="' + base + '/stego.png" alt="Photo with the hidden secret">' +
+      '<div class="before"><img src="' + base + '/original.png" alt="Original photo"></div>' +
+      '<div class="handle">' + icon("arrows", 18, "#1D1D1F", 2.2) + "</div>" +
+      '<span class="tag l">Original</span><span class="tag r">With secret</span>' +
+      '<label class="sr" for="cmpRange">Compare original and secret photo</label><input type="range" id="cmpRange" min="0" max="100" value="50"></div>';
+    const cmp = $("#cmp"), before = cmp.querySelector(".before"), handle = cmp.querySelector(".handle");
+    const fit = () => { before.querySelector("img").style.width = cmp.clientWidth + "px"; };
+    cmp.querySelector("img").addEventListener("load", fit);
+    fit();
+    window.addEventListener("resize", fit);
+    $("#cmpRange").addEventListener("input", (e) => { before.style.width = e.target.value + "%"; handle.style.left = e.target.value + "%"; });
+  } else if (R.view === "diff") {
+    $("#viewHint").textContent = "Yellow = pixels that changed. Data is written from the top row down.";
+    v.innerHTML = '<div class="viewer"><img src="' + base + '/diff.png" alt="Map of changed pixels"><span class="tag l">Changed pixels</span></div>';
+  } else {
+    $("#viewHint").textContent = R.used_percent < 5
+      ? "Your secret uses only " + (R.used_percent < 0.01 ? "<0.01" : R.used_percent.toFixed(2)) + "% of the photo, so only the top rows change. Hide a bigger file to see the pattern take over."
+      : "Look at the top of the picture: hidden data turns bit 0 into even, featureless noise.";
+    v.innerHTML = '<div class="xray2"><div class="viewer"><img id="xo" alt="Bit plane of the original photo"><span class="tag l">Original</span></div>' +
+      '<div class="viewer"><img id="xs" alt="Bit plane of the photo with the secret"><span class="tag l">With secret</span></div></div>' +
+      '<div class="slider" style="margin-top:12px"><label for="bitR" class="lbl">Bit</label><input type="range" id="bitR" min="0" max="7" value="' + R.bit + '">' +
+      '<output id="bitV" class="num" style="font-weight:700;width:16px">' + R.bit + "</output></div>" +
+      '<div class="bitlabel" id="bitL">' + esc(BIT_TEXT[R.bit]) + "</div>";
+    const load = () => {
+      $("#xo").src = base + "/xray?which=original&bit=" + R.bit;
+      $("#xs").src = base + "/xray?which=stego&bit=" + R.bit;
+      $("#bitV").textContent = R.bit; $("#bitL").textContent = BIT_TEXT[R.bit];
+    };
+    $("#bitR").addEventListener("input", (e) => { R.bit = Number(e.target.value); load(); });
+    load();
+  }
+}
+
+async function resultAsFile() {
+  const res = await fetch("/api/result/" + encodeURIComponent(R.token) + "/download");
+  if (!res.ok) throw new Error("This result has expired. Hide the message again.");
+  return new File([await res.blob()], R.filename, { type: "image/png" });
+}
+
+// =====================================================================
+// EXTRACT
+// =====================================================================
+const X = { image: null, busy: false };
+dropzone("extractDrop", "extractFile", (f) => setExtractImage(f));
+function setExtractImage(file) {
+  if (!isImage(file)) return toast("That's not an image", "Open the PNG that has the secret.", "bad");
+  X.image = file;
+  const el = $("#extractDrop");
+  el.classList.add("has");
+  const lossy = /\.(jpe?g|webp)$/i.test(file.name) || /jpeg|webp/.test(file.type);
+  el.innerHTML = photoView(file, '<span class="chip">' + esc(file.name) + '</span><span class="chip num">' + human(file.size) + "</span>" +
+    (lossy ? '<span class="chip warn">JPG/WebP may have lost the secret</span>' : ""), "extract");
+  $("#exResult").hidden = true;
+  $("#exHint").innerHTML = "";
+  updateExtract();
+}
+function clearExtractImage() {
+  X.image = null;
+  resetDrop("extractDrop", "Drop the PixelVault photo", "Use the original PNG, not a screenshot or WhatsApp copy");
+  $("#exResult").hidden = true; $("#exHint").innerHTML = "";
+  updateExtract();
+}
+function updateExtract() {
+  $("#extractBtn").disabled = X.busy || !X.image;
+  $("#exReason").textContent = X.image ? "Ready" : "Open a photo first";
+}
+async function doExtract() {
+  if (X.busy || !X.image) return;
+  const fd = new FormData();
+  fd.append("image", X.image);
+  const pw = $("#exPw").value;
+  if (pw) fd.append("password", pw);
+  X.busy = true; setBusy($("#extractBtn"), true, "Unlocking…");
+  try {
+    const r = await api("/api/extract", fd);
+    $("#exHint").innerHTML = "";
+    renderSecret(r);
+  } catch (err) {
+    handleExtractError(err.data || { code: "error", message: err.message });
+  } finally {
+    X.busy = false; setBusy($("#extractBtn"), false); updateExtract();
+  }
+}
+function attemptsHTML(d) {
+  if (!d.max_attempts) return "";
+  const left = d.attempts_left == null ? d.max_attempts : d.attempts_left;
+  const used = d.max_attempts - left;
+  let dots = "";
+  for (let i = 0; i < d.max_attempts; i++) dots += '<i class="' + (i < used ? "used" : "") + '"></i>';
+  return '<div class="row" style="gap:10px"><div class="dots" aria-hidden="true">' + dots + '</div><span class="sub" style="margin:0">' +
+    left + " of " + d.max_attempts + " tries left before it locks forever</span></div>";
+}
+function handleExtractError(d) {
+  const res = $("#exResult");
+  if (d.code === "need_password" || d.code === "wrong_password") {
+    res.hidden = true;
+    const wrong = d.code === "wrong_password";
+    $("#exHint").innerHTML = '<div class="note ' + (wrong ? "bad" : "") + '">' + icon(wrong ? "x" : "lock", 18) + "<div><b>" +
+      (wrong ? "Wrong password." : "This secret is locked.") + "</b> " + (wrong ? "Check the password and try again." : "Enter the password above.") +
+      (d.read_once ? " It will self-destruct after it's opened." : "") + "</div></div>" + attemptsHTML(d);
+    const f = $("#exPwField");
+    f.classList.remove("shake"); void f.offsetWidth; if (wrong) f.classList.add("shake");
+    $("#exPw").focus(); if (wrong) $("#exPw").select();
+    return;
+  }
+  $("#exHint").innerHTML = "";
+  const destroyed = d.code === "destroyed";
+  const title = { destroyed: "This secret is gone", no_payload: "No secret found", corrupted: "The secret is damaged", bad_image: "Can't read this file" }[d.code] || "Couldn't open it";
+  res.hidden = false;
+  res.innerHTML = '<div class="rhead"><div class="okbadge ' + (destroyed ? "warn" : "bad") + '">' + icon(destroyed ? "flame" : "x", 26, "currentColor", 2.4) + "</div>" +
+    '<div style="flex:1;min-width:220px"><h2>' + esc(title) + '</h2><p class="sub">' + esc(d.message) + "</p></div></div>" +
+    (d.code === "no_payload" || d.code === "corrupted" ? '<div class="note">' + icon("info", 18) + "<span>Make sure it's the exact PNG that PixelVault made. Sending it through WhatsApp, editing, resizing or taking a screenshot erases the secret.</span></div>" : "");
+}
+function renderSecret(r) {
+  const res = $("#exResult");
+  res.hidden = false;
+  const badges = (r.encrypted ? '<span class="chip ok">' + icon("lock", 13) + "AES-256 encrypted</span>" : '<span class="chip">Not encrypted</span>') +
+    (r.read_once ? '<span class="chip warn">' + icon("flame", 13) + "Read once</span>" : "");
+  const gone = r.destroyed_now ? '<div class="note warn">' + icon("flame", 18) + "<span><b>This secret has now self-destructed.</b> It can't be opened again, so copy or save it now.</span></div>" : "";
+  if (r.kind === "text") {
+    res.innerHTML = '<div class="rhead"><div class="okbadge acc">' + icon("unlock", 24) + "</div>" +
+      '<div style="flex:1;min-width:220px"><h2>Secret message</h2><div class="chips" style="justify-content:flex-start;margin-top:6px">' + badges + "</div></div>" +
+      '<button type="button" class="btn" data-action="copy">' + icon("copy", 17) + "Copy</button></div>" +
+      '<div class="secret" id="secretText" tabindex="0" aria-label="Secret message"></div>' +
+      '<div class="meta"><span class="num">' + [...r.text].length.toLocaleString() + " characters</span><span>" + (r.compressed ? "Was compressed inside the photo" : "") + "</span></div>" + gone;
+    typeOut($("#secretText"), r.text);
+    X.lastText = r.text;
+  } else {
+    const ext = (r.name.split(".").pop() || "file").slice(0, 4).toUpperCase();
+    res.innerHTML = '<div class="rhead"><div class="okbadge acc">' + icon("file", 24) + "</div>" +
+      '<div style="flex:1;min-width:220px"><h2>Hidden file found</h2><div class="chips" style="justify-content:flex-start;margin-top:6px">' + badges + "</div></div></div>" +
+      '<div class="filecard"><div class="fileic">' + esc(ext) + '</div><div style="flex:1;min-width:0"><b style="display:block;font-size:16px;overflow-wrap:anywhere">' + esc(r.name) +
+      '</b><span class="sub num">' + esc(r.size_human) + "</span></div>" +
+      '<a class="btn primary" href="/api/file/' + esc(r.token) + '" download="' + esc(r.name) + '">' + icon("download", 18) + "Download</a></div>" +
+      (r.destroyed_now ? '<div class="note warn">' + icon("flame", 18) + "<span><b>This secret has now self-destructed.</b> The download works once, so save the file now.</span></div>" : "");
+  }
+  setTimeout(() => res.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" }), 60);
+}
+function typeOut(el, text) {
+  if (reduced || text.length > 1500) { el.textContent = text; return; }
+  const chars = [...text];
+  const per = Math.max(1, Math.ceil(chars.length / 70));
+  let i = 0;
+  el.classList.add("caret");
+  const t = setInterval(() => {
+    i = Math.min(chars.length, i + per);
+    el.textContent = chars.slice(0, i).join("");
+    if (i >= chars.length) { clearInterval(t); el.classList.remove("caret"); }
+  }, 18);
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); }
+  catch (e) {
+    const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
+  }
+  toast("Copied", "The secret is on your clipboard.");
+}
+
+// =====================================================================
+// DETECT
+// =====================================================================
+let D = null;
+dropzone("detectDrop", "detectFile", (f) => runDetect(f), { reclick: true });
+async function runDetect(file) {
+  if (!isImage(file)) return toast("That's not an image", "Choose a photo to scan.", "bad");
+  const drop = $("#detectDrop");
+  drop.innerHTML = '<div class="ic"><span class="spin" style="border-color:var(--accent-soft);border-top-color:var(--accent)"></span></div><b>Scanning ' + esc(file.name) + "…</b><span>Checking the signature and running RS analysis</span>";
+  const fd = new FormData(); fd.append("image", file);
+  try {
+    const r = await api("/api/detect", fd);
+    D = { ...r, bit: 0, channel: "all" };
+    renderDetect();
+  } catch (err) {
+    toast("Couldn't scan this file", err.message, "bad");
+  }
+  resetDrop("detectDrop", "Drop another photo to scan", "Nothing is revealed and no password is needed", "scan");
+}
+function renderDetect() {
+  const r = D, sig = r.signature, st = r.stats;
+  const out = $("#detResult");
+  out.hidden = false;
+  let sigHTML;
+  if (sig.found) {
+    const status = sig.destroyed ? (sig.destroyed_reason === "locked" ? "Locked (too many wrong passwords)" : "Self-destructed (already read)") : "Can still be opened";
+    sigHTML = '<div class="verdict"><div class="top"><div class="okbadge bad" style="width:40px;height:40px">' + icon("eye", 20) + "</div><div><b>PixelVault secret found</b><small>Signature scan · certain</small></div></div>" +
+      '<dl class="kv"><dt>Hidden data</dt><dd class="num">' + esc(sig.payload_human) + " (" + sig.percent_of_image.toLocaleString(undefined, { maximumFractionDigits: 2 }) + "% of the photo)</dd>" +
+      "<dt>Encrypted</dt><dd>" + (sig.encrypted ? "Yes, AES-256" : "No, anyone can read it") + "</dd>" +
+      "<dt>Self-destruct</dt><dd>" + (sig.read_once ? "After one reading" : sig.max_attempts ? "After " + sig.max_attempts + " wrong passwords" : "Off") + "</dd>" +
+      "<dt>Status</dt><dd>" + esc(status) + "</dd></dl></div>";
+  } else {
+    sigHTML = '<div class="verdict"><div class="top"><div class="okbadge" style="width:40px;height:40px">' + icon("check", 20) + "</div><div><b>" +
+      (sig.damaged ? "Damaged PixelVault data" : "No PixelVault signature") + "</b><small>Signature scan</small></div></div>" +
+      '<p class="sub" style="margin:0">' + (sig.damaged ? "Something was hidden here, but the photo was edited or compressed afterwards." : "This photo doesn't contain a PixelVault secret.") + "</p></div>";
+  }
+  const rate = st.rate == null ? null : st.rate * 100;
+  const vText = { likely: "Hidden data likely", possible: "Possibly hidden data", unlikely: "No statistical signs", too_small: "Photo too small to analyse" }[st.verdict];
+  const vCls = { likely: "bad", possible: "warn", unlikely: "", too_small: "" }[st.verdict];
+  const actual = sig.found ? Math.min(100, sig.percent_of_image) : null;
+  const statHTML = '<div class="verdict"><div class="top"><div class="okbadge ' + vCls + '" style="width:40px;height:40px">' + icon("scan", 20) + "</div><div><b>" + esc(vText) +
+    "</b><small>RS analysis · statistical estimate</small></div></div>" +
+    (rate == null ? "" :
+      '<div class="gauge" role="img" aria-label="Estimated share of the photo carrying hidden data: ' + rate.toFixed(0) + ' percent"><span class="mk" style="left:' + Math.min(100, rate) + '%"></span>' +
+      (actual != null ? '<span class="mk actual" style="left:' + actual + '%" title="Actual"></span>' : "") + "</div>" +
+      '<div class="gscale"><span style="left:0">0% · clean</span><span style="left:20%">20%</span><span style="left:30%">30%</span><span style="left:100%">100% · full</span></div>' +
+      '<dl class="kv"><dt>Estimate</dt><dd class="num">' + rate.toFixed(1) + "% of colour values" + (st.estimated_human ? " ≈ " + esc(st.estimated_human) : "") + "</dd>" +
+      (actual != null ? '<dt><span style="color:var(--accent)">■</span> Actual</dt><dd class="num">' + actual.toFixed(1) + "% (from the signature)</dd>" : "") + "</dl>") +
+    '<p class="sub" style="margin:0">' + (sig.found && st.verdict === "unlikely" ? "Small secrets are statistically invisible. That's the strength of LSB hiding, and why the signature scan exists." :
+      "Natural photos score close to 0%. Values above 30% usually mean something is hidden. Most accurate on camera photos; on smooth digital images the estimate can read high.") + "</p></div>";
+
+  out.innerHTML =
+    '<div class="dgrid">' +
+      '<section class="glass card stack"><div class="row" style="justify-content:space-between"><h2>' + esc(r.name) + '</h2></div>' +
+        '<div class="viewer"><img src="/api/scan/' + esc(r.token) + '/preview.png" alt="Scanned photo"></div>' +
+        '<div class="chips" style="justify-content:flex-start"><span class="chip num">' + r.width.toLocaleString() + " × " + r.height.toLocaleString() + '</span><span class="chip">' + esc(r.format) +
+        '</span><span class="chip num">Could hold ' + esc(r.capacity_human) + "</span></div>" +
+        (r.lossy ? '<div class="note warn">' + icon("info", 18) + "<span>This is a compressed JPG/WebP. Compression erases LSB secrets, so it's very unlikely to carry one.</span></div>" : "") +
+      "</section>" +
+      '<section class="glass card stack"><h2>Results</h2>' + sigHTML + statHTML + "</section>" +
+    "</div>" +
+    '<section class="glass card stack"><div class="row" style="justify-content:space-between"><div><h2>Pixel X-ray</h2><p class="sub">Slide down to bit 0 to see where secrets live.</p></div>' +
+      '<div class="seg" role="group" aria-label="Colour channel" id="chSeg">' +
+        ["all", "r", "g", "b"].map((c) => '<button type="button" data-ch="' + c + '" aria-pressed="' + (D.channel === c) + '">' + ({ all: "All", r: "Red", g: "Green", b: "Blue" })[c] + "</button>").join("") +
+      "</div></div>" +
+      '<div class="viewer" style="background:#000"><img id="dx" alt="Bit plane view"></div>' +
+      '<div class="slider"><label for="dBit" class="lbl">Bit</label><input type="range" id="dBit" min="0" max="7" value="' + D.bit + '"><output id="dBitV" class="num" style="font-weight:700;width:16px">' + D.bit + "</output></div>" +
+      '<div class="bitlabel" id="dBitL"></div></section>';
+  const load = () => {
+    $("#dx").src = "/api/scan/" + encodeURIComponent(D.token) + "/xray?bit=" + D.bit + "&channel=" + D.channel;
+    $("#dBitV").textContent = D.bit; $("#dBitL").textContent = BIT_TEXT[D.bit];
+    document.querySelectorAll("#chSeg button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.ch === D.channel));
+  };
+  $("#dBit").addEventListener("input", (e) => { D.bit = Number(e.target.value); load(); });
+  $("#chSeg").addEventListener("click", (e) => { const b = e.target.closest("[data-ch]"); if (b) { D.channel = b.dataset.ch; load(); } });
+  load();
+  setTimeout(() => out.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" }), 60);
+}
+
+// =====================================================================
+// LEARN: step-by-step animation
+// =====================================================================
+const BASE_PX = [[202, 154, 96], [201, 155, 95], [203, 153, 97]];
+const A = { step: 0, bit: 0, timer: null };
+const STEPS = [
+  ["Every character is a number.", "Computers store letters as numbers using Unicode/ASCII."],
+  ["Every number is 8 bits.", "One byte = eight 0s and 1s."],
+  ["A pixel stores three colours.", "Red, green and blue, each from 0 to 255, also 8 bits each."],
+  ["Swap the last bit of each colour.", "One bit of the letter goes into each colour value."],
+  ["The colour barely moves.", "Each value changes by 0 or 1 out of 255. Your eye can't tell."],
+  ["That's the whole trick.", ""],
+];
+function animChar() {
+  const v = [...$("#animChar").value][0] || "H";
+  const code = v.codePointAt(0);
+  return { ch: v, code: code > 255 ? null : code };
+}
+function renderAnim() {
+  const { ch, code } = animChar();
+  const stage = $("#stage");
+  const s = A.step;
+  if (code == null) {
+    $("#capTitle").textContent = "Try an English letter for this demo";
+    $("#capText").textContent = "Hindi and emoji use several bytes each. PixelVault handles them; the animation shows one byte.";
+    stage.innerHTML = "";
+    return;
+  }
+  const bits = code.toString(2).padStart(8, "0").split("").map(Number);
+  const embedded = s >= 3 ? (s === 3 ? A.bit : 8) : 0;
+  $("#capTitle").textContent = STEPS[s][0];
+  $("#capText").textContent = s === 5
+    ? "8 bits fit in 8 colour values, about 3 pixels per character. A 12-megapixel photo can hold about 4.5 MB."
+    : s === 0 ? "'" + ch + "' is stored as " + code + "." : STEPS[s][1];
+
+  let html = '<div class="letter"><div class="lettertile">' + esc(ch) + "</div>";
+  if (s >= 0) html += '<span class="arrow">→</span><span class="code num">' + code + "</span>";
+  if (s >= 1) {
+    html += '<span class="arrow">→</span><div class="bits">' + bits.map((b, i) =>
+      '<span class="bit' + (s === 3 && i === A.bit - 1 ? " cur" : "") + (s >= 3 && i < embedded - (s === 3 ? 1 : 0) ? " done" : "") + '">' + b + "</span>").join("") + "</div>";
+  }
+  html += "</div>";
+  if (s >= 2) {
+    html += '<div class="pixels">' + BASE_PX.map((px, p) => {
+      const after = px.map((val, c) => {
+        const idx = p * 3 + c;
+        return idx < embedded && idx < 8 ? (val & 0xFE) | bits[idx] : val;
+      });
+      const rows = px.map((val, c) => {
+        const idx = p * 3 + c;
+        const nv = after[c];
+        const hit = s === 3 && idx === A.bit - 1;
+        const idle = idx >= 8;
+        const b = nv.toString(2).padStart(8, "0");
+        return '<div class="ch' + (hit ? " hit" : "") + (idle && s >= 3 ? " idle" : "") + '"><span class="n">' + "RGB"[c] + '</span><code>' + b.slice(0, 7) + "<em>" + b[7] + "</em></code>" +
+          '<span class="d num' + (nv !== val ? " chg" : "") + '">' + nv + "</span></div>";
+      }).join("");
+      const sw = s >= 4
+        ? '<div class="sw" title="Before and after"><div style="background:rgb(' + px.join(",") + ')"></div><div style="background:rgb(' + after.join(",") + ')"></div></div>'
+        : '<div class="sw"><div style="background:rgb(' + after.join(",") + ')"></div></div>';
+      return '<div class="px"><div class="meta"><b>Pixel ' + (p + 1) + "</b><span>" + (s >= 4 ? "before | after" : "") + "</span></div>" + sw + rows + "</div>";
+    }).join("") + "</div>";
+  }
+  stage.innerHTML = html;
+  $("#progress").innerHTML = STEPS.map((_, i) => '<i class="' + (i === s ? "on" : "") + '"></i>').join("");
+  $("#animNext").innerHTML = (s === 3 && A.bit < 8 ? "Next bit" : s === STEPS.length - 1 ? "Watch again" : "Next") + icon("right", 16);
+}
+function animNext() {
+  if (A.step === 3 && A.bit < 8) {
+    A.bit++;
+    if (A.bit === 1 && !reduced) {      // play the rest automatically
+      clearInterval(A.timer);
+      A.timer = setInterval(() => { if (A.step !== 3 || A.bit >= 8) return clearInterval(A.timer); A.bit++; renderAnim(); }, 650);
+    }
+  } else if (A.step === STEPS.length - 1) { A.step = 0; A.bit = 0; }
+  else { A.step++; if (A.step === 3) A.bit = 0; }
+  renderAnim();
+}
+function animPrev() {
+  clearInterval(A.timer);
+  if (A.step === 3 && A.bit > 0) A.bit = 0;
+  else if (A.step > 0) { A.step--; if (A.step === 3) A.bit = 8; }
+  renderAnim();
+}
+$("#animChar").addEventListener("input", () => { clearInterval(A.timer); if (A.step >= 3) A.bit = A.step === 3 ? 0 : 8; renderAnim(); });
+
+// =====================================================================
+// Global click / input wiring
+// =====================================================================
+document.addEventListener("click", async (e) => {
+  const seg = e.target.closest("[data-mode]");
+  if (seg) {
+    H.mode = seg.dataset.mode;
+    document.querySelectorAll("#modeSeg button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.mode === H.mode));
+    $("#textBox").hidden = H.mode !== "text"; $("#fileBox").hidden = H.mode !== "file";
+    return updateHide();
+  }
+  const vs = e.target.closest("[data-view]");
+  if (vs && R) { R.view = vs.dataset.view; return renderViewer(); }
+
+  const t = e.target.closest("[data-action]"); if (!t) return;
+  const a = t.dataset.action;
+  if (a === "toggle-pw") {
+    const inp = $("#" + t.dataset.target);
+    const show = inp.type === "password";
+    inp.type = show ? "text" : "password";
+    t.innerHTML = icon(show ? "eyeoff" : "eye", 18);
+    t.setAttribute("aria-label", show ? "Hide password" : "Show password");
+  }
+  else if (a === "attempts") { H.attempts = Math.max(1, Math.min(20, H.attempts + Number(t.dataset.d))); updateHide(); }
+  else if (a === "hide-change") $("#hideFile").click();
+  else if (a === "hide-clear") clearHideImage();
+  else if (a === "secret-clear") clearSecretFile();
+  else if (a === "extract-change") $("#extractFile").click();
+  else if (a === "extract-clear") clearExtractImage();
+  else if (a === "hide-new") { $("#hideResult").hidden = true; $("#msg").value = ""; clearSecretFile(); updateHide(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  else if (a === "send-extract" || a === "send-detect") {
+    try {
+      const f = await resultAsFile();
+      if (a === "send-extract") { setExtractImage(f); go("extract"); $("#exPw").focus({ preventScroll: true }); toast("Photo loaded", "Now enter the password and press Reveal.", "info"); }
+      else { go("detect"); runDetect(f); }
+    } catch (err) { toast("Couldn't load the result", err.message, "bad"); }
+  }
+  else if (a === "copy") copyText(X.lastText || "");
+  else if (a === "anim-next") animNext();
+  else if (a === "anim-prev") animPrev();
+  else if (a === "anim-reset") { clearInterval(A.timer); A.step = 0; A.bit = 0; renderAnim(); }
+  else if (a === "reset") {
+    if (t.dataset.confirm !== "1") {
+      t.dataset.confirm = "1"; t.textContent = "Click again to clear self-destruct records and results";
+      setTimeout(() => { t.dataset.confirm = ""; t.textContent = "Reset demo data"; }, 4000);
+      return;
+    }
+    t.dataset.confirm = ""; t.textContent = "Reset demo data";
+    try {
+      await api("/api/reset", new FormData());
+      R = null; D = null;
+      $("#hideResult").hidden = true; $("#exResult").hidden = true; $("#detResult").hidden = true; $("#exHint").innerHTML = "";
+      toast("Demo data cleared", "Self-destructed secrets can be opened again.");
+    } catch (err) { toast("Couldn't reset", err.message, "bad"); }
+  }
+});
+$("#useSample").addEventListener("click", useSample);
+$("#hideBtn").addEventListener("click", doHide);
+$("#extractBtn").addEventListener("click", doExtract);
+$("#exPw").addEventListener("keydown", (e) => { if (e.key === "Enter") doExtract(); });
+["msg", "hidePw"].forEach((id) => $("#" + id).addEventListener("input", updateHide));
+["readOnce", "lockOn"].forEach((id) => $("#" + id).addEventListener("change", updateHide));
+document.querySelectorAll('[data-action="toggle-pw"]').forEach((b) => (b.innerHTML = icon("eye", 18)));
+
+// =====================================================================
+// Start
+// =====================================================================
+paintIcons();
+go(location.hash.slice(1) || "hide", { keepScroll: true });
+updateHide(); updateExtract();
+requestAnimationFrame(movePill);
+document.fonts && document.fonts.ready.then(movePill);
+</script>
+</body>
+</html>
